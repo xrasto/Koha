@@ -331,13 +331,11 @@ if (C4::Context->preference('BakerTaylorEnabled')) {
     );
 }
 
-if (C4::Context->preference("enableCoverImagesInOpacList")){
-    if (C4::Context->preference("OPACAmazonCoverImages") or 
-        C4::Context->preference("GoogleJackets") or
-        C4::Context->preference("BakerTaylorEnabled") or
-        C4::Context->preference("SyndeticsCoverImages")) {
-        $template->param(JacketImages=>1);
-    }
+if (C4::Context->preference("OPACAmazonCoverImages") or 
+    C4::Context->preference("GoogleJackets") or
+    C4::Context->preference("BakerTaylorEnabled") or
+    C4::Context->preference("SyndeticsCoverImages")) {
+    $template->param(JacketImages=>1);
 }
 
 $template->param(
