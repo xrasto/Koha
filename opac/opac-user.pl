@@ -42,7 +42,6 @@ use Koha::Patron::Attribute::Types;
 use Koha::Patron::Messages;
 use Koha::Patron::Discharge;
 use Koha::Patrons;
-if (C4::Context->preference( 'OPACShowDetailedDebarments')) {use Data::Dumper}; # FIXME_KOHA-925
 
 use constant ATTRIBUTE_SHOW_BARCODE => 'SHOW_BCODE';
 
@@ -96,56 +95,25 @@ my ($warning_year, $warning_month, $warning_day) = split /-/, $borr->{'dateexpir
 
 my $debar = Koha::Patrons->find( $borrowernumber )->is_debarred;
 my $userdebarred;
-# KOHA-925 ------------------------------------------ START ------------------ #
-if (C4::Context->preference( 'OPACShowDetailedDebarments')) { # FIXME_KOHA-925
+if (C4::Context->preference( 'OPACShowDetailedDebarments')) {
     our $restrictionCodeList = [];
     if ( $borr->{'gonenoaddress'}){push $restrictionCodeList, "ADDRESS_MISSING"};
     if ( $borr->{'lost'})         {push $restrictionCodeList, "CARD_LOST"};
-    # OVERDUES_PROCESS
-    # FINES_EXCEEDED
-    # ( renewal_blocked_fines.defined ) && ( OpacRenewalAllowed )
-
     my $debarments = Koha::Patron::Debarments::GetDebarments({ borrowernumber => $borrowernumber});
     my ($hashref, $key, $val, $comment);
-    my $borrstring = my $debugstring = my $commentstring = '';
+    my $borrstring = my $commentstring = '';
     foreach $hashref (@$debarments){
         $commentstring = %$hashref{'comment'};
-        # DEBUG -------------------------------------------- #
-        # $debugstring .= Dumper(%$hashref{'comment'});
-        # $debugstring .= "<br/># ----------------------------------- #<br/>\n";
-        # DEBUG -------------------------------------------- #
         if ($commentstring =~ m/,/){
-            # $debugstring .= "there was a comma<br/>";
             ($key, $val, $comment) = $commentstring =~ m/^([^,]+),([^:]+)(?::(.*))?$/;
-            # $debugstring .= "              key:$key<br/>";
-            # $debugstring .= "              val:$val<br/>";
-            # $debugstring .= "          comment:$comment<br/>";
         }else{
-            # $debugstring .= "there was no comma<br/>";
             $key = $commentstring =~ m/^(\S+)\s/;
-            # $debugstring .= "              key:$key";
         }
         $borr->{"${key}comment"}  = $comment;
         push $restrictionCodeList, $key;
     }
     $borr->{'restrictionCodeList'}    = $restrictionCodeList;
-    # DEBUG -------------------------------------------- #
-    # $borr->{'debugstring'}    = $debugstring;
-    # $borr -> {'borrdump'} = Dumper($borr);
-    # DEBUG -------------------------------------------- #
-
-    #my (@matches, $match, $key, $val, $comment);
-    #@matches = $borr->{debarredcomment} =~ m/([^,]+,[^,]+)(?:(?=\s+[^,]+)|$)/g; 
-    #
-    #foreach $match (@matches){
-    #  $match =~ s/^\s+|\s+$//g;
-    #  ($key, $val, $comment) = $match =~ /^([^,]+),\s+([^:]+)(?::\s*)?(.*)?$/;
-    #  $borr->{"${key}comment"}  = $comment;
-    #  push $restrictionCodeList, $key;
-    #}
-    #$borr->{'restrictionCodeList'}    = $restrictionCodeList;
 };
-# KOHA-925 ------------------------------------------ END   ------------------ #
 
 if ($debar) {
     $userdebarred = 1;
@@ -181,9 +149,7 @@ if (   C4::Context->preference('OpacRenewalAllowed')
     && defined($no_renewal_amt)
     && $amountoutstanding > $no_renewal_amt )
 {
-# KOHA-925 fix -------------------------------------- start ---- #
 if (C4::Context->preference( 'OPACShowDetailedDebarments')) {push our $restrictionCodeList, "FINES_EXCEEDED";}
-# KOHA-925 fix -------------------------------------- end   ---- #
 
     $borr->{'flagged'} = 1;
     $canrenew = 0;

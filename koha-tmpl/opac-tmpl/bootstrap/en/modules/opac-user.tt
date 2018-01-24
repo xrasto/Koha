@@ -98,7 +98,6 @@ Using this account is not recommended because some parts of Koha will not functi
                         </div>
                     [% END %]
 
-                    <!--  OPACShowDetailedDebarments = yes  ----- start ----- -->
                     [% IF Koha.Preference( 'OPACShowDetailedDebarments') %]
                       [% IF ( patron_flagged ) %]
                         <div class="alert">
@@ -124,10 +123,7 @@ Using this account is not recommended because some parts of Koha will not functi
                           </ul>
                           <span><a href="#"> Contact the library</a> if you have any questions.</span>
                         </div>
-                        <!-- <div class="alert">[% BORROWER_INFO.borrdump %]</div> -->
                       [% END %]
-                      <!--  OPACShowDetailedDebarments = yes  ----- end   ----- -->
-                      <!--  OPACShowDetailedDebarments = no   ----- start ----- -->
                     [% ELSE %]    
                       [% IF ( patron_flagged ) %]
                         <div class="alert">
@@ -165,7 +161,6 @@ Using this account is not recommended because some parts of Koha will not functi
                         </div>
                       [% END %] <!--   IF patron_flagged -->
                     [% END %]
-                    <!--  OPACShowDetailedDebarments = no   ----- end   ----- -->
                     <div class="alert alert-info" id="notesaved" style="display:none;"></div>
 
                     [% SET OPACMySummaryNote = Koha.Preference('OPACMySummaryNote') %]
