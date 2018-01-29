@@ -24,11 +24,10 @@ my $ti = $query->param('ti');
 my $au = $query->param('au');
 my $yr = $query->param('yr');
 my $isbn = $query->param('isbn');
-
 my $si = $query->param('si');
 my $item = $query->param('item');
 my $ll = $query->param('ll');
-
+my $mt = $query->param('mt');
 
 unless ($ti) {
   print $query->header(-type => 'text/xml', -status => '400');
@@ -72,9 +71,15 @@ unless ($si =~ /^G$|^Gcl|^Ghdk$|^Ge$|^Gg$|^Gk$|^Gm$|^Gp$|^Gumu$/) {
   exit 0;
 }
 
+unless ($mt =~ /^a$|^c$/) {
+  print $query->header(-type => 'text/xml', -status => '400');
+  print XMLout({ status => "wrong mt", error_code => 'wrong_mt' }, NoAttr => 1, RootName => 'response', XMLDecl => 1);
+  exit 0;
+}
+
 my $record = MARC::Record->new();
 
-$record->leader('00000nam a22000005a 4500');
+$record->leader("00000n"."$mt"."m a22000005a 4500");
 
 my $year = strftime "%Y", localtime;
 my $month = strftime "%m", localtime;
@@ -134,35 +139,45 @@ my $f_500 = MARC::Field->new('500', '', '', a => "$isbn");
 
 ## create a 952 field
 
-my $f_952a = "40";
+my $f_952ab = "40";
+my $f_952c = "440099";
 if ($si =~ /^G$/) {
-  $f_952a = "44";
+  $f_952ab = "44";
+  $f_952c = "440099";
 }
 if ($si =~ /^Gm$/) {
-  $f_952a = "40";
-}
+  $f_952ab = "40";
+  $f_952c = "400099";
+   }
 if ($si =~ /^Ge$/) {
-  $f_952a = "48";
+  $f_952ab = "48";
+  $f_952c = "480099";
 }
 if ($si =~ /^Gp$/) {
-  $f_952a = "47";
+  $f_952ab = "47";
+  $f_952c = "470099";
 }
 if ($si =~ /^Gk$/) {
-  $f_952a = "42";
+  $f_952ab = "42";
+  $f_952c = "420099";
 }
 if ($si =~ /^Gg$/) {
-  $f_952a = "49";
+  $f_952ab = "49";
+  $f_952c = "490099";
 }
 if ($si =~ /^Gcl$/) {
-  $f_952a = "50";
+  $f_952ab = "50";
+  $f_952c = "500099";
 }
 if ($si =~ /^Ghdk$/) {
-  $f_952a = "60";
+  $f_952ab = "60";
+  $f_952c = "600099";
 }
 if ($si =~ /^Gumu$/) {
-  $f_952a = "62";
+  $f_952ab = "62";
+  $f_952c = "620099";
 }
-my $f_952 = MARC::Field->new('952', '', '', a => $f_952a, o => "$si".' '. "FJÄRR IN". ' '."$ll".' '."$shdate", p => "$item", y => "13");
+my $f_952 = MARC::Field->new('952', '', '', a => $f_952ab, b => $f_952ab, c => $f_952c, o => "$si".' '. "FJÄRR IN". ' '."$ll".' '."$shdate", p => "$item", y => "13");
 
 $record->append_fields($f_952);
 
